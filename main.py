@@ -1,107 +1,141 @@
 import streamlit as st
-import time
+import datetime
 import random
 
 # 페이지 기본 설정
 st.set_page_config(
-    page_title="귀염뽀짝 저녁 메뉴 돌림판",
-    page_icon="🎡",
+    page_title="나만의 글로벌 남친 찾기",
+    page_icon="💖",
     layout="centered"
 )
 
-# 귀엽고 아기자기한 디자인을 위한 커스텀 CSS 적용
+# 모던하고 감성적인 CSS 디자인 적용
 st.markdown("""
     <style>
     .main-title {
-        font-size: 2.3rem;
+        font-size: 2.2rem;
         font-weight: 800;
-        color: #FF6B81;
+        color: #FF4B6C;
         text-align: center;
         margin-bottom: 0.2rem;
     }
     .sub-title {
-        font-size: 1.1rem;
-        color: #706fd3;
+        font-size: 1.05rem;
+        color: #6B7280;
         text-align: center;
         margin-bottom: 2rem;
     }
-    .slot-box {
-        background-color: #ffeaa7;
-        border: 3px dashed #fdcb6e;
+    .result-card {
+        background: linear-gradient(135deg, #FFF1F2, #FFE4E6);
+        border: 2px solid #FECDD3;
         border-radius: 20px;
         padding: 2rem;
         text-align: center;
-        font-size: 2rem;
-        font-weight: bold;
-        color: #d63031;
-        margin: 1.5rem 0;
-    }
-    .result-box {
-        background: linear-gradient(135deg, #ff9ff3, #feca57);
-        border-radius: 20px;
-        padding: 2rem;
-        text-align: center;
-        color: white;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 20px rgba(255, 75, 108, 0.1);
         margin-top: 1.5rem;
+    }
+    .tag {
+        display: inline-block;
+        background-color: #FF4B6C;
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # 헤더 영역
-st.markdown('<p class="main-title">🎡 오늘의 저녁 메뉴 돌림판</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">뭐 먹을지 고민될 땐? 돌림판에게 운명을 맡겨보세요! 💛</p>', unsafe_allow_html=True)
+st.markdown('<p class="main-title">💖 운명의 글로벌 남친 찾기</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">내 생년월일과 운명적으로 통하는 세계 각국의 랜선 남친은 누구일까요? ✨</p>', unsafe_allow_html=True)
 
-# 기본 저녁 메뉴 리스트
-default_menus = ["치킨 🍗", "떡볶이 🌶️", "삼겹살 🥩", "초밥 🍣", "파스타 🍝", "짜장면 🍜", "피자 🍕", "햄버거 🍔"]
+# 글로벌 남자 연예인 데이터베이스 (이름, 국가, 설명, 이미지 URL)
+boyfriends = [
+    {
+        "name": "티모시 샬라메 (Timothée Chalamet)",
+        "country": "🇺🇸 미국 / 프랑스",
+        "desc": "예술가 같은 눈빛과 대체 불가능한 분위기의 할리우드 스윗가이 ☕",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80" # 감성적인 초상화 대체 이미지 (실제 구동시 해당 연예인 이미지 링크 사용 가능)
+    },
+    {
+        "name": "변우석",
+        "country": "🇰🇷 대한민국",
+        "desc": "다정다감한 눈빛과 완벽한 피지컬로 설렘을 유발하는 청춘 로맨스 장인 🌸",
+        "image": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        "name": "사카구치 켄타로",
+        "country": "🇯🇵 일본",
+        "desc": "청량하고 훈훈한 미소로 마음을 무장해제시키는 일본 대표 멜로 남신 ☀️",
+        "image": "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        "name": "헨리 카빌 (Henry Cavill)",
+        "country": "🇬🇧 영국",
+        "desc": "클래식한 영국 신사의 품격과 조각 같은 이목구비를 가진 완벽남 🎩",
+        "image": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        "name": "송강",
+        "country": "🇰🇷 대한민국",
+        "desc": "보고만 있어도 기분 좋아지는 화려한 비주얼과 다정한 개구쟁이 매력 💫",
+        "image": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        "name": "라이언 고슬링 (Ryan Gosling)",
+        "country": "🇨🇦 캐나다",
+        "desc": "유머러스하고 로맨틱한 눈빛을 가진 대체 불가의 츤데레 매력남 🎬",
+        "image": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=600&q=80"
+    }
+]
 
-# 사이드바에서 메뉴 커스텀마이징 기능 제공
-with st.sidebar:
-    st.header("✨ 메뉴 커스텀하기")
-    st.write("원하는 메뉴를 추가하거나 빼보세요!")
-    
-    # 텍스트 영역을 통해 메뉴를 줄바꿈으로 입력받음
-    menu_input = st.text_area(
-        "메뉴 목록 (줄바꿈으로 구분)",
-        value="\n".join(default_menus),
-        height=200
+# 사용자 입력 영역
+col1, col2 = st.columns(2)
+with col1:
+    user_name = st.text_input("당신의 이름을 입력해 주세요:", "김스윗")
+with col2:
+    birth_date = st.date_input(
+        "당신의 생년월일:",
+        value=datetime.date(2000, 1, 1),
+        min_value=datetime.date(1950, 1, 1),
+        max_value=datetime.date(2015, 12, 31)
     )
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# 매칭 버튼
+if st.button("💘 운명의 남친 만나러 가기", type="primary", use_container_width=True):
+    # 생년월일의 숫자를 조합하여 매번 일관되면서도 재미있는 결과가 나오도록 시드(Seed) 설정
+    seed_value = birth_date.year * 10000 + birth_date.month * 100 + birth_date.day + len(user_name)
+    random.seed(seed_value)
     
-    # 입력된 텍스트를 리스트로 변환 (빈 줄 제거)
-    custom_menus = [m.strip() for m in menu_input.split("\n") if m.strip()]
-
-# 메인 화면 - 현재 등록된 메뉴 미리보기
-st.info(f"현재 돌림판에 들어간 메뉴 총 **{len(custom_menus)}개**! 🎯")
-
-# 돌림판 실행 버튼
-if st.button("🎲 돌림판 돌리기!", type="primary", use_container_width=True):
-    if len(custom_menus) < 2:
-        st.warning("돌림판을 돌리려면 메뉴가 최소 2개 이상 필요해요!")
-    else:
-        # 돌림판이 돌아가는 듯한 연출 (애니메이션 효과)
-        slot_placeholder = st.empty()
-        
-        # 빠르게 메뉴가 바뀌는 효과
-        for _ in range(12):
-            temp_menu = random.choice(custom_menus)
-            slot_placeholder.markdown(f'<div class="slot-box">🌀 {temp_menu} 🌀</div>', unsafe_allow_html=True)
-            time.sleep(0.08) # 0.08초 간격으로 변경
-            
-        # 최종 당첨 메뉴 선정
-        winner = random.choice(custom_menus)
-        
-        # 폭죽 애니메이션 효과
-        st.balloons()
-        
-        # 최종 결과 출력
-        slot_placeholder.markdown(f"""
-            <div class="result-box">
-                <h2 style="margin: 0; font-size: 1.8rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">🎉 당첨 메뉴! 🎉</h2>
-                <h1 style="margin: 0.5rem 0 0 0; font-size: 2.8rem; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">{winner}</h1>
-                <p style="margin-top: 1rem; font-size: 1.1rem;">오늘 저녁은 이거다! 맛있게 드세요 😋</p>
-            </div>
-        """, unsafe_allow_html=True)
+    # 랜덤하게 남친 선정
+    selected_bf = random.choice(boyfriends)
+    
+    # 폭죽 효과
+    st.balloons()
+    
+    # 결과 출력 카드
+    st.markdown(f"""
+        <div class="result-card">
+            <span class="tag">{selected_bf['country']}</span>
+            <h2 style="color: #1F2937; margin-top: 0.2rem; margin-bottom: 0.5rem;">{user_name}님의 운명의 남친은?</h2>
+            <h1 style="color: #FF4B6C; font-size: 2rem; margin-bottom: 1rem;">✨ {selected_bf['name']} ✨</h1>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # 이미지 출력 (정중앙 배치)
+    st.image(selected_bf['image'], use_container_width=True)
+    
+    # 설명 캡션
+    st.markdown(f"""
+        <div style="background-color: white; padding: 1.2rem; border-radius: 12px; text-align: center; border: 1px solid #E5E7EB; margin-top: 1rem;">
+            <p style="font-size: 1.1rem; color: #4B5563; margin: 0; font-weight: 500;">💬 "{selected_bf['desc']}"</p>
+        </div>
+    """, unsafe_allow_html=True)
 
 # 푸터
 st.markdown("---")
-st.markdown("<p style='text-align: center; color: #b2bec3; font-size: 0.85rem;'>Made with Streamlit ✨ Enjoy your meal!</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #9CA3AF; font-size: 0.85rem;'>Made with Streamlit ❤️ Have a sweet day!</p>", unsafe_allow_html=True)
